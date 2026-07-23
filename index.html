@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sollicitatie Tracker</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    h1 { color: var(--primary); font-size: 1.8rem; }
+
+    /* Formulier styling */
+    .form-card {
+      background: var(--card-bg);
+      padding: 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+
+    @media (min-width: 640px) {
+      .form-grid { grid-template-columns: 1fr 1fr; }
+      .full-width { grid-column: span 2; }
+    }
+
+    input, select, button, textarea {
+      width: 100%;
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--primary);
+      border-color: transparent;
+    }
+
+    button.btn-primary {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button.btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Sollicitatie Kaarten */
+    .cards-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 1.25rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+    .card-subtitle { color: #64748b; font-size: 0.95rem; }
+
+    .contact-info {
+      font-size: 0.9rem;
+      background: #f1f5f9;
+      padding: 0.6rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .contact-info p { margin-bottom: 0.2rem; }
+    .contact-info a { color: var(--primary); text-decoration: none; }
+
+    /* Acties & Tijdlijn */
+    .timeline-title {
+      font-size: 0.95rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .action-list {
+      list-style: none;
+      margin-bottom: 1rem;
+    }
+
+    .action-item {
+      font-size: 0.88rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .action-time {
+      color: #94a3b8;
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .add-action-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .add-action-form input { flex: 1; }
+    .add-action-form button { width: auto; padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>📋 Sollicitatie Tracker</h1>
+    </header>
+
+    <!-- Formulier Nieuwe Sollicitatie -->
+    <section class="form-card">
+      <form id="sollicitatieForm" class="form-grid">
+        <div>
+          <label>Werkgever *</label>
+          <input type="text" id="werkgever" required placeholder="bijv. School / Bedrijf X">
+        </div>
+        <div>
+          <label>Functie *</label>
+          <input type="text" id="functie" required placeholder="bijv. Onderwijsassistent">
+        </div>
+        <div>
+          <label>Contactpersoon</label>
+          <input type="text" id="contactpersoon" placeholder="Naam contactpersoon">
+        </div>
+        <div>
+          <label>E-mailadres</label>
+          <input type="email" id="email" placeholder="naam@bedrijf.nl">
+        </div>
+        <div>
+          <label>Telefoonnummer</label>
+          <input type="tel" id="telefoon" placeholder="06 - 12345678">
+        </div>
+        <div>
+          <label>Eerste actie (optioneel)</label>
+          <input type="text" id="eersteActie" placeholder="bijv. Sollicitatiebrief verstuurd">
+        </div>
+        <div class="full-width">
+          <button type="submit" class="btn-primary">Sollicitatie Toevoegen</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Overzicht van Sollicitaties -->
+    <section id="sollicitatiesLijst" class="cards-list">
+      <!-- Wordt dynamisch gevuld vanuit Firebase -->
+    </section>
+  </div>
+
+  <!-- Firebase Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      updateDoc, 
+      doc, 
+      arrayUnion, 
+      onSnapshot, 
+      serverTimestamp 
+    } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+    // 🔴 PLAK HIER JOUW FIREBASE CONFIGURATIE DIE JE BIJ STAP 2 KREEG:
+    	
+	const firebaseConfig = {
+    apiKey: "AIzaSyDmlaR-Bylvk-TtEma0h3iyvt3YLwhL7Vs",
+    authDomain: "sollhelper.firebaseapp.com",
+    projectId: "sollhelper",
+    storageBucket: "sollhelper.firebasestorage.app",
+    messagingSenderId: "788682019261",
+    appId: "1:788682019261:web:402702ab5247826ea502d4"
+  };
+
+
+    // Firebase Initialiseren
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const sollicitatiesRef = collection(db, "sollicitaties");
+
+    // Elementen
+    const form = document.getElementById('sollicitatieForm');
+    const lijst = document.getElementById('sollicitatiesLijst');
+
+    // --- NIEUWE SOLLICITATIE OPSLAAN ---
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const werkgever = document.getElementById('werkgever').value;
+      const functie = document.getElementById('functie').value;
+      const contactpersoon = document.getElementById('contactpersoon').value;
+      const email = document.getElementById('email').value;
+      const telefoon = document.getElementById('telefoon').value;
+      const eersteActie = document.getElementById('eersteActie').value;
+
+      const acties = [];
+      if (eersteActie.trim() !== "") {
+        acties.push({
+          tekst: eersteActie,
+          datum: new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' })
+        });
+      }
+
+      await addDoc(sollicitatiesRef, {
+        werkgever,
+        functie,
+        contactpersoon,
+        email,
+        telefoon,
+        acties,
+        aangemaaktOp: serverTimestamp()
+      });
+
+      form.reset();
+    });
+
+    // --- REALTIME LUISTEREN (SYNC TELEFOON & PC) ---
+    onSnapshot(sollicitatiesRef, (snapshot) => {
+      lijst.innerHTML = '';
+
+      // Sorteer sollicitaties op nieuwste bovenaan
+      const docs = [];
+      snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
+      docs.sort((a, b) => (b.aangemaaktOp?.seconds || 0) - (a.aangemaaktOp?.seconds || 0));
+
+      docs.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        // Render acties
+        let actiesHtml = '';
+        if (item.acties && item.acties.length > 0) {
+          actiesHtml = item.acties.map(a => `
+            <li class="action-item">
+              <span>${a.tekst}</span>
+              <span class="action-time">${a.datum}</span>
+            </li>
+          `).join('');
+        } else {
+          actiesHtml = '<li class="action-item" style="color: #94a3b8;">Nog geen acties vastgelegd.</li>';
+        }
+
+        card.innerHTML = `
+          <div class="card-header">
+            <div>
+              <div class="card-title">${item.werkgever}</div>
+              <div class="card-subtitle">${item.functie}</div>
+            </div>
+          </div>
+
+          <div class="contact-info">
+            <p>👤 <strong>Contact:</strong> ${item.contactpersoon || 'Niet opgegeven'}</p>
+            ${item.email ? `<p>📧 <a href="mailto:${item.email}">${item.email}</a></p>` : ''}
+            ${item.telefoon ? `<p>📞 <a href="tel:${item.telefoon}">${item.telefoon}</a></p>` : ''}
+          </div>
+
+          <div class="timeline-title">📜 Historie / Acties:</div>
+          <ul class="action-list">${actiesHtml}</ul>
+
+          <div class="add-action-form">
+            <input type="text" id="actieInput-${item.id}" placeholder="Nieuwe actie (bijv. Gebeld)">
+            <button class="btn-primary" onclick="voegActieToe('${item.id}')">+</button>
+          </div>
+        `;
+
+        lijst.appendChild(card);
+      });
+    });
+
+    // --- ACTIE TOEVOEGEN AAN BESTAANDE SOLLICITATIE ---
+    window.voegActieToe = async (id) => {
+      const input = document.getElementById(`actieInput-${id}`);
+      const tekst = input.value.trim();
+      if (!tekst) return;
+
+      const nu = new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' });
+      const docRef = doc(db, "sollicitaties", id);
+
+      await updateDoc(docRef, {
+        acties: arrayUnion({
+          tekst: tekst,
+          datum: nu
+        })
+      });
+
+      input.value = '';
+    };
+  </script>
+</body>
+</html>

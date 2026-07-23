@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Zachte schaduw onder het klembord -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Blauwe achtergrondafwerking met afgeronde hoeken -->
+  <rect width="512" height="512" rx="112" fill="#2563eb"/>
+
+  <!-- Het Klembord (Plank) -->
+  <g filter="url(#shadow)">
+    <rect x="116" y="96" width="280" height="352" rx="20" fill="#ffffff"/>
+    
+    <!-- Het Papier op het klembord -->
+    <rect x="136" y="136" width="240" height="292" rx="10" fill="#f8fafc"/>
+
+    <!-- Regels / Vinkjes op het papier -->
+    <!-- Regel 1 met vinkje -->
+    <path d="M168 184 l12 12 l24 -24" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="224" y1="184" x2="336" y2="184" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Regel 2 met vinkje -->
+    <path d="M168 248 l12 12 l24 -24" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="224" y1="248" x2="336" y2="248" stroke="#94a3b8" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Regel 3 (lopend punt) -->
+    <circle cx="180" cy="312" r="6" fill="#2563eb"/>
+    <line x1="224" y1="312" x2="310" y2="312" stroke="#cbd5e1" stroke-width="10" stroke-linecap="round"/>
+
+    <!-- Metalen Klem bovenaan -->
+    <rect x="206" y="76" width="100" height="40" rx="8" fill="#cbd5e1"/>
+    <rect x="226" y="64" width="60" height="24" rx="12" fill="#94a3b8"/>
+    <circle cx="256" cy="96" r="8" fill="#475569"/>
+  </g>
+</svg>

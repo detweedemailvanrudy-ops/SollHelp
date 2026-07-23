@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<!-- SVG Favicon voor moderne browsers & PWA -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="favicon.svg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sollicitatie Tracker Pro</title>
@@ -607,6 +612,15 @@
         await deleteDoc(doc(db, "sollicitaties", id));
       }
     };
+  </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker geregistreerd! Scope:', reg.scope))
+        .catch((err) => console.error('Service Worker fout:', err));
+    });
+  }
   </script>
 </body>
 </html>

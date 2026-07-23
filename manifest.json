@@ -1,0 +1,18 @@
+{
+  "name": "Sollicitatie Dashboard",
+  "short_name": "Sollicitaties",
+  "description": "Beheer en synchroniseer je sollicitaties realtime op pc en telefoon.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f1f5f9",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "48x48 72x72 96x96 128x128 192x192 256x256 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

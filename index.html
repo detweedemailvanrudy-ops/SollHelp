@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sollicitatie Tracker</title>
+  <title>Sollicitatie Tracker Pro</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -12,6 +12,12 @@
       --card-bg: #ffffff;
       --text: #1e293b;
       --border: #e2e8f0;
+      
+      /* Status Kleuren */
+      --status-lopend: #3b82f6;
+      --status-uitgenodigd: #10b981;
+      --status-afgewezen: #ef4444;
+      --status-aangeschreven: #f59e0b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +48,7 @@
       padding: 1.25rem;
       border-radius: 12px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .form-grid {
@@ -82,6 +88,27 @@
       background-color: var(--primary-hover);
     }
 
+    /* Zoek & Filter Balk */
+    .controls-card {
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .controls-card {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .controls-card input { flex: 2; }
+      .controls-card select { flex: 1; }
+    }
+
     /* Sollicitatie Kaarten */
     .cards-list {
       display: flex;
@@ -95,6 +122,7 @@
       border: 1px solid var(--border);
       padding: 1.25rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      position: relative;
     }
 
     .card-header {
@@ -104,21 +132,46 @@
       border-bottom: 1px solid var(--border);
       padding-bottom: 0.75rem;
       margin-bottom: 0.75rem;
+      gap: 0.5rem;
     }
 
-    .card-title { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+    .card-title { font-size: 1.2rem; font-weight: bold; color: var(--text); }
     .card-subtitle { color: #64748b; font-size: 0.95rem; }
+
+    /* Badge voor Status */
+    .badge {
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-Lopend { background-color: var(--status-lopend); }
+    .badge-Aangeschreven { background-color: var(--status-aangeschreven); }
+    .badge-Uitgenodigd { background-color: var(--status-uitgenodigd); }
+    .badge-Afgewezen { background-color: var(--status-afgewezen); }
 
     .contact-info {
       font-size: 0.9rem;
       background: #f1f5f9;
       padding: 0.6rem;
       border-radius: 6px;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
     }
 
     .contact-info p { margin-bottom: 0.2rem; }
-    .contact-info a { color: var(--primary); text-decoration: none; }
+    .contact-info a { color: var(--primary); text-decoration: none; word-break: break-all; }
+
+    .notes-box {
+      font-size: 0.9rem;
+      background: #fffbe3;
+      border-left: 4px solid #f59e0b;
+      padding: 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
 
     /* Acties & Tijdlijn */
     .timeline-title {
@@ -150,17 +203,32 @@
     .add-action-form {
       display: flex;
       gap: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     .add-action-form input { flex: 1; }
     .add-action-form button { width: auto; padding: 0.5rem 1rem; }
+
+    /* Actieknoppen onderaan kaart */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .btn-status { width: auto; font-size: 0.85rem; padding: 0.4rem; }
+    .btn-delete { background: #fee2e2; color: #ef4444; border: none; font-size: 0.85rem; cursor: pointer; padding: 0.4rem 0.8rem; border-radius: 6px; width: auto; }
+    .btn-delete:hover { background: #fca5a5; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>📋 Sollicitatie Tracker</h1>
+      <h1>📋 Sollicitatie Tracker Pro</h1>
     </header>
 
     <!-- Formulier Nieuwe Sollicitatie -->
@@ -175,6 +243,15 @@
           <input type="text" id="functie" required placeholder="bijv. Onderwijsassistent">
         </div>
         <div>
+          <label>Status</label>
+          <select id="status">
+            <option value="Lopend">Lopend</option>
+            <option value="Aangeschreven">Aangeschreven</option>
+            <option value="Uitgenodigd">Uitgenodigd</option>
+            <option value="Afgewezen">Afgewezen</option>
+          </select>
+        </div>
+        <div>
           <label>Contactpersoon</label>
           <input type="text" id="contactpersoon" placeholder="Naam contactpersoon">
         </div>
@@ -186,14 +263,30 @@
           <label>Telefoonnummer</label>
           <input type="tel" id="telefoon" placeholder="06 - 12345678">
         </div>
-        <div>
-          <label>Eerste actie (optioneel)</label>
-          <input type="text" id="eersteActie" placeholder="bijv. Sollicitatiebrief verstuurd">
+        <div class="full-width">
+          <label>Link naar vacature (optioneel)</label>
+          <input type="url" id="vacatureUrl" placeholder="https://www.meesterbaan.nl/...">
+        </div>
+        <div class="full-width">
+          <label>Notities / Aandachtspunten</label>
+          <textarea id="notities" rows="2" placeholder="Bijv. Sluitingsdatum is 1 augustus, vacaturenummer #1234"></textarea>
         </div>
         <div class="full-width">
           <button type="submit" class="btn-primary">Sollicitatie Toevoegen</button>
         </div>
       </form>
+    </section>
+
+    <!-- Zoek & Filter Besturing -->
+    <section class="controls-card">
+      <input type="text" id="zoekInput" placeholder="🔍 Zoek op werkgever of functie...">
+      <select id="filterStatus">
+        <option value="ALLES">Alle Statussen</option>
+        <option value="Lopend">Lopend</option>
+        <option value="Aangeschreven">Aangeschreven</option>
+        <option value="Uitgenodigd">Uitgenodigd</option>
+        <option value="Afgewezen">Afgewezen</option>
+      </select>
     </section>
 
     <!-- Overzicht van Sollicitaties -->
@@ -210,23 +303,22 @@
       collection, 
       addDoc, 
       updateDoc, 
+      deleteDoc,
       doc, 
       arrayUnion, 
       onSnapshot, 
       serverTimestamp 
     } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-    // 🔴 PLAK HIER JOUW FIREBASE CONFIGURATIE DIE JE BIJ STAP 2 KREEG:
-    	
-	const firebaseConfig = {
-    apiKey: "AIzaSyDmlaR-Bylvk-TtEma0h3iyvt3YLwhL7Vs",
-    authDomain: "sollhelper.firebaseapp.com",
-    projectId: "sollhelper",
-    storageBucket: "sollhelper.firebasestorage.app",
-    messagingSenderId: "788682019261",
-    appId: "1:788682019261:web:402702ab5247826ea502d4"
-  };
-
+    // 🔴 PLAK HIER JOUW FIREBASE CONFIGURATIE:
+    const firebaseConfig = {
+  apiKey: "AIzaSyDmlaR-Bylvk-TtEma0h3iyvt3YLwhL7Vs",
+  authDomain: "sollhelper.firebaseapp.com",
+  projectId: "sollhelper",
+  storageBucket: "sollhelper.firebasestorage.app",
+  messagingSenderId: "788682019261",
+  appId: "1:788682019261:web:402702ab5247826ea502d4"
+};
 
     // Firebase Initialiseren
     const app = initializeApp(firebaseConfig);
@@ -236,6 +328,10 @@
     // Elementen
     const form = document.getElementById('sollicitatieForm');
     const lijst = document.getElementById('sollicitatiesLijst');
+    const zoekInput = document.getElementById('zoekInput');
+    const filterStatus = document.getElementById('filterStatus');
+
+    let alleSollicitaties = [];
 
     // --- NIEUWE SOLLICITATIE OPSLAAN ---
     form.addEventListener('submit', async (e) => {
@@ -243,26 +339,25 @@
 
       const werkgever = document.getElementById('werkgever').value;
       const functie = document.getElementById('functie').value;
+      const status = document.getElementById('status').value;
       const contactpersoon = document.getElementById('contactpersoon').value;
       const email = document.getElementById('email').value;
       const telefoon = document.getElementById('telefoon').value;
-      const eersteActie = document.getElementById('eersteActie').value;
+      const vacatureUrl = document.getElementById('vacatureUrl').value;
+      const notities = document.getElementById('notities').value;
 
-      const acties = [];
-      if (eersteActie.trim() !== "") {
-        acties.push({
-          tekst: eersteActie,
-          datum: new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' })
-        });
-      }
+      const nu = new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' });
 
       await addDoc(sollicitatiesRef, {
         werkgever,
         functie,
+        status,
         contactpersoon,
         email,
         telefoon,
-        acties,
+        vacatureUrl,
+        notities,
+        acties: [{ tekst: `Sollicitatie aangemaakt (${status})`, datum: nu }],
         aangemaaktOp: serverTimestamp()
       });
 
@@ -271,14 +366,36 @@
 
     // --- REALTIME LUISTEREN (SYNC TELEFOON & PC) ---
     onSnapshot(sollicitatiesRef, (snapshot) => {
+      alleSollicitaties = [];
+      snapshot.forEach(doc => alleSollicitaties.push({ id: doc.id, ...doc.data() }));
+      
+      // Sorteer op nieuwste bovenaan
+      alleSollicitaties.sort((a, b) => (b.aangemaaktOp?.seconds || 0) - (a.aangemaaktOp?.seconds || 0));
+
+      renderLijst();
+    });
+
+    // --- RENDER & FILTER FUNCTIE ---
+    function renderLijst() {
       lijst.innerHTML = '';
 
-      // Sorteer sollicitaties op nieuwste bovenaan
-      const docs = [];
-      snapshot.forEach(doc => docs.push({ id: doc.id, ...doc.data() }));
-      docs.sort((a, b) => (b.aangemaaktOp?.seconds || 0) - (a.aangemaaktOp?.seconds || 0));
+      const zoekTerm = zoekInput.value.toLowerCase();
+      const gekozenFilter = filterStatus.value;
 
-      docs.forEach((item) => {
+      const gefilterd = alleSollicitaties.filter(item => {
+        const komtOvereenMetZoek = item.werkgever.toLowerCase().includes(zoekTerm) || 
+                                   item.functie.toLowerCase().includes(zoekTerm);
+        const komtOvereenMetStatus = gekozenFilter === 'ALLES' || item.status === gekozenFilter;
+
+        return komtOvereenMetZoek && komtOvereenMetStatus;
+      });
+
+      if (gefilterd.length === 0) {
+        lijst.innerHTML = '<p style="text-align:center; color:#94a3b8; margin-top:2rem;">Geen sollicitaties gevonden.</p>';
+        return;
+      }
+
+      gefilterd.forEach((item) => {
         const card = document.createElement('div');
         card.className = 'card';
 
@@ -291,8 +408,6 @@
               <span class="action-time">${a.datum}</span>
             </li>
           `).join('');
-        } else {
-          actiesHtml = '<li class="action-item" style="color: #94a3b8;">Nog geen acties vastgelegd.</li>';
         }
 
         card.innerHTML = `
@@ -301,28 +416,49 @@
               <div class="card-title">${item.werkgever}</div>
               <div class="card-subtitle">${item.functie}</div>
             </div>
+            <span class="badge badge-${item.status}">${item.status}</span>
           </div>
 
           <div class="contact-info">
             <p>👤 <strong>Contact:</strong> ${item.contactpersoon || 'Niet opgegeven'}</p>
             ${item.email ? `<p>📧 <a href="mailto:${item.email}">${item.email}</a></p>` : ''}
             ${item.telefoon ? `<p>📞 <a href="tel:${item.telefoon}">${item.telefoon}</a></p>` : ''}
+            ${item.vacatureUrl ? `<p>🔗 <a href="${item.vacatureUrl}" target="_blank" rel="noopener">Bekijk Vacature</a></p>` : ''}
           </div>
+
+          ${item.notities ? `<div class="notes-box">📝 <strong>Notities:</strong> ${item.notities}</div>` : ''}
 
           <div class="timeline-title">📜 Historie / Acties:</div>
           <ul class="action-list">${actiesHtml}</ul>
 
           <div class="add-action-form">
-            <input type="text" id="actieInput-${item.id}" placeholder="Nieuwe actie (bijv. Gebeld)">
+            <input type="text" id="actieInput-${item.id}" placeholder="Nieuwe actie (bijv. Brief verstuurd)">
             <button class="btn-primary" onclick="voegActieToe('${item.id}')">+</button>
+          </div>
+
+          <div class="card-actions">
+            <div>
+              <select class="btn-status" onchange="wijzigStatus('${item.id}', this.value)">
+                <option value="" disabled selected>Status wijzigen...</option>
+                <option value="Lopend">Lopend</option>
+                <option value="Aangeschreven">Aangeschreven</option>
+                <option value="Uitgenodigd">Uitgenodigd</option>
+                <option value="Afgewezen">Afgewezen</option>
+              </select>
+            </div>
+            <button class="btn-delete" onclick="verwijderSollicitatie('${item.id}')">🗑️ Verwijder</button>
           </div>
         `;
 
         lijst.appendChild(card);
       });
-    });
+    }
 
-    // --- ACTIE TOEVOEGEN AAN BESTAANDE SOLLICITATIE ---
+    // Zoek & Filter Events
+    zoekInput.addEventListener('input', renderLijst);
+    filterStatus.addEventListener('change', renderLijst);
+
+    // --- ACTIES: ACTIE TOEVOEGEN ---
     window.voegActieToe = async (id) => {
       const input = document.getElementById(`actieInput-${id}`);
       const tekst = input.value.trim();
@@ -332,13 +468,28 @@
       const docRef = doc(db, "sollicitaties", id);
 
       await updateDoc(docRef, {
-        acties: arrayUnion({
-          tekst: tekst,
-          datum: nu
-        })
+        acties: arrayUnion({ tekst, datum: nu })
       });
 
       input.value = '';
+    };
+
+    // --- ACTIES: STATUS WIJZIGEN ---
+    window.wijzigStatus = async (id, nieuweStatus) => {
+      const nu = new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' });
+      const docRef = doc(db, "sollicitaties", id);
+
+      await updateDoc(docRef, {
+        status: nieuweStatus,
+        acties: arrayUnion({ tekst: `Status gewijzigd naar: ${nieuweStatus}`, datum: nu })
+      });
+    };
+
+    // --- ACTIES: VERWIJDEREN ---
+    window.verwijderSollicitatie = async (id) => {
+      if (confirm('Weet je zeker dat je deze sollicitatie wilt verwijderen?')) {
+        await deleteDoc(doc(db, "sollicitaties", id));
+      }
     };
   </script>
 </body>
